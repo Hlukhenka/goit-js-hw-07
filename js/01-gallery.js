@@ -1,21 +1,19 @@
 import { galleryItems } from "./gallery-items.js";
-import * as basicLightbox from "basiclightbox";
 
-const instance = basicLightbox.create(`
-    <div class="modal">
-        <p>
-            Your first lightbox with just a few lines of code.
-            Yes, it's really that simple.
-        </p>
-    </div>
-`);
-
-console.log(galleryItems);
 const gallery = document.querySelector(".gallery");
 
 const fotoEl = galleryItems
   .map((item) => {
-    return `<li class="gallery__item"><a class="gallery__link"><img class="gallery__image " src="${item.preview}" alt="${item.description}" width="340px"></img></a></li>`;
+    return `<div class="gallery__item">
+    <a class="gallery__link" href="${item.original}" >
+      <img
+        class="gallery__image"
+        src="${item.preview}"
+        data-source="${item.original}"
+        alt="${item.description}"
+      />
+    </a>
+  </div>`;
   })
   .join("");
 
@@ -24,9 +22,28 @@ gallery.insertAdjacentHTML("afterbegin", fotoEl);
 gallery.addEventListener("click", onGalleryClick);
 
 function onGalleryClick(e) {
-  if (e.target.nodeName !== "IMG") {
+  e.preventDefault();
+  const img = e.target;
+  if (img.nodeName !== "IMG") {
     return;
   }
-  console.log("click");
-  instance.show()
+
+  const modal = basicLightbox.create(
+    `<div >
+      <img src="${img.dataset.source}" width="800px" alt="${img.alt}"> </img>
+     </div>`
+  );
+
+  modal.show();
+
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.code === "Escape") {
+        modal.close();
+        console.log("click Escape");
+      }
+    },
+    { once: true }
+  );
 }
